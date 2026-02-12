@@ -1,163 +1,135 @@
 AGENTS Guide
 
 Purpose
-- This repository is a Neovim configuration (Lua) based on kickstart.nvim and lazy.nvim.
-- This guide standardizes how agentic coding agents operate here: commands, style rules, structure, and safety.
-- Audience: automated/code agents and contributors working inside ~/.config/nvim.
+- Neovim configuration (Lua) based on kickstart.nvim + lazy.nvim living in ~/.config/nvim
+- Standardizes how agentic coding agents operate here: commands, style rules, structure, and safety
+- Audience: automated/code agents and human contributors
 
 Repo Layout
 - init.lua — primary configuration with lazy.nvim plugin specs and setup
-- lua/kickstart/plugins/*.lua — optional plugin modules (lint, autopairs, etc.)
-- lua/custom/plugins/*.lua — your local plugin specs (currently empty). Import is commented in init.lua
-- lazy-lock.json — plugin lockfile managed by lazy.nvim
-- .stylua.toml — canonical Lua formatting rules
+- lua/kickstart/plugins/*.lua — optional plugin modules (lint, autopairs, debug, neo-tree, etc.)
+- lua/custom/plugins/*.lua — local plugin specs; this repo includes lua/custom/plugins/init.lua and it is imported by init.lua
+- lazy-lock.json — plugin lockfile managed by lazy.nvim (do not hand-edit)
+- .stylua.toml — canonical Lua formatting rules for the repo
 - .github/workflows/stylua.yml — example CI formatter check (gated to upstream repo)
 
 System Requirements
 - Neovim: latest stable or nightly
-- External CLI tools used by plugins and config:
+- External CLIs used by plugins/config:
   - git, make, unzip, a C compiler (for native plugin builds)
   - ripgrep and fd (used by Telescope)
-  - Optional: Nerd Font; set vim.g.have_nerd_font = true in init.lua if installed
+  - Optional: Nerd Font; init.lua sets vim.g.have_nerd_font = true
 
 Build / Sync / Health
-- Bootstrap/install plugins (first run or after changes):
-  - Launch Neovim: nvim
-  - Open lazy UI: :Lazy, then press s to sync (or run headless command below)
-- Headless plugin sync (CI-friendly):
-  - nvim --headless "+Lazy! sync" +qa
-- Update plugins interactively: :Lazy update
+- First run / after plugin changes:
+  - nvim (boot) → :Lazy → press s to sync
+  - Headless sync: nvim --headless "+Lazy! sync" +qa
+- Update plugins: :Lazy update; clean unused: nvim --headless "+Lazy! clean" +qa
 - Health checks:
-  - Full: nvim --headless "+checkhealth" +qa
-  - Single section (e.g., telescope): nvim --headless "+checkhealth telescope" +qa
-- Smoke test (load config, exit non-zero on startup errors):
-  - nvim --headless +qa
+  - All: nvim --headless "+checkhealth" +qa
+  - Single provider: nvim --headless "+checkhealth telescope" +qa (replace provider name)
+- Smoke test (load config, exit non-zero on startup errors): nvim --headless +qa
 
 Format / Lint / Test Commands
-- Lua formatting (canonical; enforced by .stylua.toml):
+- Lua format (enforced via .stylua.toml):
   - Format repo: stylua .
   - Check only: stylua --check .
-  - Single file check: stylua --check path/to/file.lua
-- Markdown lint (nvim-lint runs in-editor; CLI shown for CI/manual):
+  - Single file: stylua path/to/file.lua
+- Markdown lint (wired via nvim-lint; CLI for manual/CI):
   - Repo: markdownlint .
   - Single file: markdownlint README.md
-  - Note: lua/kickstart/plugins/lint.lua configures nvim-lint to run markdownlint on markdown buffers automatically.
-- Tests: there are no unit tests defined for this config today.
-  - Health as tests: nvim --headless "+checkhealth" +qa (treat failures as test failures)
-  - Single "test" pattern: run checkhealth for exactly one provider, e.g. telescope or mason (see above)
-  - If you add Lua unit tests (e.g., with busted), typical commands:
+- Tests: no unit tests are defined for this config today.
+  - Treat checkhealth as tests: nvim --headless "+checkhealth" +qa
+  - Single "test" equivalent: nvim --headless "+checkhealth mason" +qa (or any provider)
+  - If you add Lua tests with busted:
     - All: busted
     - Single file: busted spec/some_spec.lua
-    - Single test by name (pattern): busted -m _spec -t "name substring"
+    - Single test by name (focus): busted -m _spec -t "name substring"
 
-CI Notes
-- .github/workflows/stylua.yml runs a Stylua check but only on the upstream repo due to:
-  - if: github.repository == 'nvim-lua/kickstart.nvim'
-- For forks/local work, run stylua locally as shown above.
+Debugging (DAP)
+- Debugger plugins are present (nvim-dap + dap-ui + Go adapter). Useful keys:
+  - <F5> continue; <F1> step into; <F2> step over; <F3> step out
+  - <leader>b toggle breakpoint; <leader>B conditional breakpoint; <F7> toggle DAP UI
 
-Adding Plugins
-- Preferred locations:
-  1) Add to init.lua inside require('lazy').setup({...}) alongside existing specs; or
-  2) Place plugin specs in lua/custom/plugins/*.lua and enable that import by uncommenting
-     the line in init.lua: { import = 'custom.plugins' }
-- Use lazy.nvim style:
-  - Minimal spec: { 'author/repo', opts = {} }
-  - Full control: { 'author/repo', config = function() ... end }
-  - Defer/lazy-load via event/ft/keys/cmd; use cond when external tools are required
+Plugin Management
+- Where to add:
+  1) Inside require('lazy').setup({...}) in init.lua; or
+  2) In lua/custom/plugins/*.lua (preferred for local changes). init.lua already requires 'custom.plugins.init'
+- Spec style (lazy.nvim):
+  - Minimal: { 'author/repo', opts = {} }
+  - Full: { 'author/repo', config = function() ... end }
+  - Defer via `event`/`ft`/`keys`/`cmd`; use `cond` when external tools are required
+- Lockfile policy: lazy-lock.json is source of truth; do not manually edit; re-sync to update
 
-Keymaps and Discoverability
-- Define keymaps with descriptions for which-key and help:
-  - vim.keymap.set(mode, lhs, rhs, { desc = 'Meaningful description' })
-- Group leader mappings consistently; see which-key setup in init.lua for examples of [S]earch, [T]oggle groups
-- Avoid hard-coding terminal-ambiguous chords; prefer defaults mapped in config
+Keymaps & Discoverability
+- Always provide descriptions for which-key/help: vim.keymap.set(mode, lhs, rhs, { desc = 'Sentence case description' })
+- Follow existing leader groups ([S]earch, [T]oggle, Git [H]unk, etc.) defined in which-key config
+- Honoring existing toggles: e.g., <leader>a toggles Aerial; '\\' reveals Neo-tree
 
 Autocommands
-- Always create an augroup per feature to avoid duplicates:
+- Create a unique augroup per feature to avoid duplicates:
   - local grp = vim.api.nvim_create_augroup('feature-name', { clear = true })
   - vim.api.nvim_create_autocmd({ 'BufWritePost' }, { group = grp, callback = function() ... end })
-- Keep callbacks small; lift logic into a local function where non-trivial
+- Keep callbacks small; lift logic into locals when non-trivial
 
 Diagnostics & UX
-- Central diagnostic behavior is configured in init.lua via vim.diagnostic.config(...)
-- Respect existing defaults (no updates in insert, severity_sort, rounded floats)
-- Use vim.diagnostic.* helpers for navigation and lists; do not rebind conflicting defaults
+- Central behavior in init.lua via vim.diagnostic.config(...): no updates in insert, severity_sort, rounded floats
+- Use vim.diagnostic.* helpers and keep default keymaps (plus provided <leader>q)
 
 LSP Conventions
-- Capabilities: extend server capabilities using require('blink.cmp').get_lsp_capabilities()
-- Server setup pattern (see init.lua):
-  - Define servers table, then iterate: server.capabilities = vim.tbl_deep_extend('force', {}, caps, server.capabilities or {})
-  - Configure lua_ls with workspace/library settings as shown
-- On attach:
-  - Define buffer-local keymaps via a helper map() that adds { buffer = event.buf, desc = 'LSP: ...' }
-  - Implement document highlight and inlay hints toggles only if client supports the method
+- Capabilities: extend via require('blink.cmp').get_lsp_capabilities()
+- Setup pattern: define `servers` table, merge capabilities, then `vim.lsp.config(name, server)` and `vim.lsp.enable(name)`
+- lua_ls: follow workspace/library/runtime settings in init.lua (do not override unless necessary)
+- On attach: define buffer-local maps with helpful 'LSP: ...' descriptions; only enable features client supports (doc highlight, inlay hints)
 
 Completion & Snippets
-- Completion via saghen/blink.cmp; preset 'default' is expected
-- Snippets via LuaSnip; install jsregexp when possible; keep mappings aligned with blink preset
+- Completion: saghen/blink.cmp preset 'default' expected; signature help enabled
+- Snippets: LuaSnip with optional jsregexp build; friendly-snippets lazy-loaded; keep mappings aligned with preset
 
 Treesitter
-- This config opts into a focused set of filetypes and starts treesitter on FileType
-- When adding languages, prefer adding to the list used by require('nvim-treesitter').install(...)
+- This config opts into a small filetype list and starts Treesitter on FileType
+- To add languages, extend the list passed to require('nvim-treesitter').install(...) in init.lua
 
 Formatting on Save
-- stevearc/conform.nvim is configured:
-  - Uses stylua for Lua; python uses isort then black
-  - lsp_format = 'fallback' with 500ms timeout
-  - Disabled for c/cpp by default; follow existing pattern for other non-standardized languages
+- stevearc/conform.nvim:
+  - lua → stylua; python → isort then black
+  - lsp_format = 'fallback', timeout 500ms
+  - Disabled for c/cpp by default; mirror pattern for other non-standardized languages
 
-Imports and Modules
-- Use require(...) at top for core dependencies; keep requires local to config blocks when scope-specific
-- For optional modules/extensions, guard with pcall to avoid startup errors:
-  - local ok, mod = pcall(require, 'telescope') if ok then ... end
-- Return tables from modules placed under lua/**; prefer snake_case filenames
-
-Naming Conventions
-- Variables and locals: lower_snake_case (e.g., lazy_path, statusline)
-- Augroups and autocommands: kebab or snake, consistent and descriptive (e.g., 'kickstart-lsp-attach')
-- Keymap descriptions: Sentence case with prefixes where appropriate (e.g., 'LSP: Go to Definition')
-
-Type Annotations (EmmyLua)
-- Use Neovim/LSP-friendly annotations to aid tooling:
-  - ---@type vim.Opt or specific plugin configs (see init.lua examples)
-  - ---@param, ---@return for public/local helpers where non-trivial
-
-Error Handling & Safety
-- Avoid throwing hard errors in plugin configs; prefer:
-  - pcall(...) for optional dependencies
-  - Checks for external tools: if vim.fn.executable('make') == 1 then ... end
-  - vim.notify('message', vim.log.levels.WARN) for recoverable issues
-- Do not modify user environment or shell state; keep changes scoped to Neovim
-
-Styling Rules (from .stylua.toml)
-- column_width = 160 (wrap prose/comments accordingly)
-- line_endings = Unix
-- indent_type = Spaces; indent_width = 2
-- quote_style = AutoPreferSingle (default to single quotes when possible)
-- call_parentheses = None (omit parens for simple calls when allowed)
-- collapse_simple_statement = Always
+Code Style Guidelines
+- Imports & modules:
+  - Place require(...) at top for core deps; keep requires local inside plugin blocks when scope-specific
+  - Guard optionals with pcall: local ok, t = pcall(require, 'telescope'); if ok then ... end
+  - Return tables from modules under lua/**; prefer snake_case filenames and locals
+- Formatting:
+  - Follow .stylua.toml (column_width 160, single quotes preferred, no parens for simple calls)
+  - Keep comments concise; avoid noise; wrap long prose to 160 cols
+  - Default to ASCII in code/comments; UI plugins may use icons but prefer text fallbacks
+- Types/annotations (EmmyLua):
+  - Use ---@type for options tables; ---@param/---@return for public helpers
+  - Use Neovim types when available (vim.Opt, plugin-specific)
+- Naming:
+  - Variables/locals lower_snake_case; augroups/autocmds kebab or snake (e.g., 'kickstart-lsp-attach')
+  - Keymap descriptions in Sentence case with prefixes (e.g., 'LSP: Go to definition')
+- Error handling & safety:
+  - Avoid hard errors in plugin configs; prefer pcall, tool existence checks (vim.fn.executable('make') == 1)
+  - Use vim.notify('message', vim.log.levels.WARN) for recoverable issues
+  - Do not mutate user shell/environment; keep scope to Neovim
 
 Git & Commit Hygiene
-- Keep changes focused; mirror existing patterns; do not commit secrets
-- If adding lua/custom/plugins, consider enabling its import in init.lua in the same change for atomicity
+- Keep changes focused; mirror style/patterns in surrounding code; never commit secrets
+- If you add lua/custom/plugins entries, ensure they are loaded (init.lua already requires custom/plugins/init.lua)
+- Prefer one logical change per commit; include rationale in message body when non-obvious
 
 Cursor / Copilot Rules
-- No Cursor rules (.cursor/rules/ or .cursorrules) found
-- No Copilot instructions (.github/copilot-instructions.md) found
-- If added later, agents must surface those rules in reviews and follow them
-
-Contributing Tips for Agents
-- Respect existing lazy.nvim structure and events; prefer event-based loading to reduce startup time
-- Always include desc in keymaps for which-key visibility
-- Use augroups for any autocmds you create; keep group names unique
-- Keep user toggles consistent with existing <leader>t* patterns
-- Update this AGENTS.md if you change any core workflows (format, lint, health, plugin import path)
+- No Cursor rules found (.cursor/rules/ or .cursorrules)
+- No Copilot instructions found (.github/copilot-instructions.md)
+- If such rules appear later, agents must surface and follow them
 
 Quick Reference
 - Sync plugins: nvim --headless "+Lazy! sync" +qa
-- Health (all): nvim --headless "+checkhealth" +qa
-- Health (one): nvim --headless "+checkhealth telescope" +qa
-- Format (write): stylua .
-- Format (check): stylua --check .
-- Lint markdown (all): markdownlint .
-- Lint markdown (one): markdownlint README.md
-- Smoke test config: nvim --headless +qa
+- Update plugins: :Lazy update; Clean: nvim --headless "+Lazy! clean" +qa
+- Health (all): nvim --headless "+checkhealth" +qa; Single: nvim --headless "+checkhealth telescope" +qa
+- Format (write): stylua .; Check: stylua --check .; One file: stylua path/to/file.lua
+- Lint markdown: markdownlint .; One file: markdownlint README.md
+- Smoke test: nvim --headless +qa
