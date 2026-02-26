@@ -214,18 +214,18 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 -- Yank file path, name, or relative path
 vim.keymap.set('n', '<leader>yf', function()
-  vim.fn.setreg('+', vim.fn.expand('%'))
-  vim.notify('Yanked full path: ' .. vim.fn.expand('%'))
+  vim.fn.setreg('+', vim.fn.expand '%')
+  vim.notify('Yanked full path: ' .. vim.fn.expand '%')
 end, { desc = '[Y]ank [F]ull File Path' })
 
 vim.keymap.set('n', '<leader>yn', function()
-  vim.fn.setreg('+', vim.fn.expand('%:t'))
-  vim.notify('Yanked file name: ' .. vim.fn.expand('%:t'))
+  vim.fn.setreg('+', vim.fn.expand '%:t')
+  vim.notify('Yanked file name: ' .. vim.fn.expand '%:t')
 end, { desc = '[Y]ank File [N]ame' })
 
 vim.keymap.set('n', '<leader>yr', function()
-  vim.fn.setreg('+', vim.fn.expand('%:.'))
-  vim.notify('Yanked relative path: ' .. vim.fn.expand('%:.'))
+  vim.fn.setreg('+', vim.fn.expand '%:.')
+  vim.notify('Yanked relative path: ' .. vim.fn.expand '%:.')
 end, { desc = '[Y]ank [R]elative File Path' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
@@ -704,7 +704,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'ruff' },
+        python = { 'ruff_organize_imports', 'ruff_format' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
