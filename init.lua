@@ -212,6 +212,22 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Yank file path, name, or relative path
+vim.keymap.set('n', '<leader>yf', function()
+  vim.fn.setreg('+', vim.fn.expand('%'))
+  vim.notify('Yanked full path: ' .. vim.fn.expand('%'))
+end, { desc = '[Y]ank [F]ull File Path' })
+
+vim.keymap.set('n', '<leader>yn', function()
+  vim.fn.setreg('+', vim.fn.expand('%:t'))
+  vim.notify('Yanked file name: ' .. vim.fn.expand('%:t'))
+end, { desc = '[Y]ank File [N]ame' })
+
+vim.keymap.set('n', '<leader>yr', function()
+  vim.fn.setreg('+', vim.fn.expand('%:.'))
+  vim.notify('Yanked relative path: ' .. vim.fn.expand('%:.'))
+end, { desc = '[Y]ank [R]elative File Path' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
@@ -313,6 +329,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>y', group = '[Y]ank' },
       },
     },
   },
@@ -687,7 +704,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
+        python = { 'isort', 'ruff' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
