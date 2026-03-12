@@ -271,6 +271,9 @@ rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+  -- rocks = {
+  --   hererocks = true, -- recommended if you do not have global installation of Lua 5.1.
+  -- },
   -- NOTE: Plugins can be added via a link or github org/name. To run setup automatically, use `opts = {}`
   { 'NMAC427/guess-indent.nvim', opts = {} },
 
@@ -808,20 +811,51 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+
+    -- TokyoNight colorscheme (commented out - uncomment to switch back)
+    -- 'folke/tokyonight.nvim',
+    -- priority = 1000, -- Make sure to load this before all the other start plugins.
+    -- config = function()
+    --   ---@diagnostic disable-next-line: missing-fields
+    --   require('tokyonight').setup {
+    --     styles = {
+    --       comments = { italic = false }, -- Disable italics in comments
+    --     },
+    --   }
+    --   vim.cmd.colorscheme 'tokyonight-night'
+    -- end,
+
+    -- Ayu colorscheme
+    'Shatur/neovim-ayu',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
+      require('ayu').setup {
+        mirage = false, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+        terminal = true, -- Set to `false` to let terminal manage its own colors.
+        overrides = function()
+          local colors = require 'ayu.colors'
+          colors.generate()
 
+          return {
+            -- Line numbers: use gutter color for better visibility while maintaining aesthetic
+            LineNr = { fg = colors.gutter_normal },
+
+            -- Current line number: accent color + bold for easy cursor location
+            CursorLineNr = {
+              fg = colors.accent,
+              bg = colors.line,
+              bold = true,
+            },
+
+            -- Empty line tildes: match line number visibility
+            NonText = { fg = colors.gutter_normal },
+          }
+        end,
+      }
       -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- Available variants: 'ayu', 'ayu-dark', 'ayu-light', 'ayu-mirage'
+      -- 'ayu' respects your background setting to choose between dark and light
+      vim.cmd.colorscheme 'ayu-dark'
     end,
   },
 
