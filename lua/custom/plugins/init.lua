@@ -369,4 +369,93 @@ return {
       hijack_file_patterns = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.avif', '*.svg' }, -- render image files as images when opened
     },
   },
+
+  -- Git diff view for VS Code-like side-by-side diff experience
+  {
+    'sindrets/diffview.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewFileHistory', 'DiffviewToggleFiles' },
+    keys = {
+      { '<leader>gd', '<cmd>DiffviewOpen<cr>', desc = 'Git [d]iff view' },
+      { '<leader>gD', '<cmd>DiffviewClose<cr>', desc = 'Close git [D]iff view' },
+      { '<leader>gh', '<cmd>DiffviewFileHistory<cr>', desc = 'Git file [h]istory (all)' },
+      { '<leader>gH', '<cmd>DiffviewFileHistory %<cr>', desc = 'Git file [H]istory (current)' },
+      { '<leader>gt', '<cmd>DiffviewToggleFiles<cr>', desc = 'Git diff [t]oggle files panel' },
+    },
+    config = function()
+      require('diffview').setup {
+        default_args = {
+          DiffviewOpen = { '--imply-local' },
+        },
+        enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
+        view = {
+          default = {
+            -- Config for changed files, and staged files in diff views.
+            layout = 'diff2_horizontal',
+            winbar_info = true, -- See ':h diffview-config-view.x.winbar_info'
+          },
+          merge_tool = {
+            -- Config for conflicted files in diff views during a merge or rebase.
+            layout = 'diff3_horizontal',
+            disable_diagnostics = true, -- Temporarily disable diagnostics in a merge/rebase
+            winbar_info = true,
+          },
+          file_history = {
+            -- Config for changed files in file history views.
+            layout = 'diff2_horizontal',
+            winbar_info = true,
+          },
+        },
+        file_panel = {
+          listing_style = 'tree', -- One of 'list' or 'tree'
+          tree_options = {
+            flatten_dirs = true, -- Flatten dirs that only contain one single dir
+            folder_statuses = 'only_folded', -- One of 'never', 'only_folded' or 'always'.
+          },
+          win_config = {
+            position = 'left', -- One of 'left', 'right', 'top', 'bottom'
+            width = 35, -- Only applies when position is 'left' or 'right'
+            win_opts = {}
+          },
+        },
+        file_history_panel = {
+          log_options = {
+            git = {
+              single_file = {
+                diff_merges = 'combined',
+              },
+              multi_file = {
+                diff_merges = 'first-parent',
+              },
+            },
+          },
+          win_config = {
+            position = 'bottom',
+            height = 16,
+            win_opts = {}
+          },
+        },
+        commit_log_panel = {
+          win_config = {
+            position = 'bottom',
+            height = 16,
+            win_opts = {}
+          }
+        },
+        default_args = {
+          DiffviewOpen = { '--imply-local' },
+          DiffviewFileHistory = { '--base=LOCAL' },
+        },
+        hooks = {
+          diff_buf_read = function(bufnr)
+            -- Change local options in diff buffers
+            vim.opt_local.wrap = false
+            vim.opt_local.list = false
+            vim.opt_local.relativenumber = false
+            vim.opt_local.colorcolumn = '80'
+          end,
+        },
+      }
+    end,
+  },
 }

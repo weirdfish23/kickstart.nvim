@@ -30,64 +30,66 @@ return {
         { source = 'git_status', display_name = '  Git ' },
       },
     },
-    -- default_component_configs = {
-    --   container = {
-    --     enable_character_fade = true
-    --   },
-    --   indent = {
-    --     indent_size = 2,
-    --     padding = 1, -- extra padding on left hand side
-    --     -- indent guides
-    --     with_markers = true,
-    --     indent_marker = '│',
-    --     last_indent_marker = '└',
-    --     highlight = 'NeoTreeIndentMarker',
-    --     -- expander config, needed for nesting files
-    --     with_expanders = nil, -- if nil and file nesting is enabled, will enable expanders
-    --     expander_collapsed = '',
-    --     expander_expanded = '',
-    --     expander_highlight = 'NeoTreeExpander',
-    --   },
-    --   icon = {
-    --     folder_closed = '',
-    --     folder_open = '',
-    --     folder_empty = '󰜌',
-    --     folder_empty_open = '󰜌',
-    --     -- The next two settings are only a fallback, if you use nvim-web-devicons and configure default icons there
-    --     -- then these will never be used.
-    --     default = '*',
-    --     highlight = 'NeoTreeFileIcon'
-    --   },
-    --   modified = {
-    --     symbol = '[+]',
-    --     highlight = 'NeoTreeModified',
-    --   },
-    --   name = {
-    --     trailing_slash = false,
-    --     use_git_status_colors = true,
-    --     highlight = 'NeoTreeFileName',
-    --   },
-    --   git_status = {
-    --     symbols = {
-    --       -- Change type
-    --       added     = '', -- or "✚", but this is redundant info if you use git_status_colors on the name
-    --       modified  = '', -- or "", but this is redundant info if you use git_status_colors on the name
-    --       deleted   = '✖',-- this can only be used in the git_status source
-    --       renamed   = '󰁕',-- this can only be used in the git_status source
-    --       -- Status type
-    --       untracked = '',
-    --       ignored   = '',
-    --       unstaged  = '󰄱',
-    --       staged    = '',
-    --       conflict  = '',
-    --     }
-    --   },
-    -- },
+    default_component_configs = {
+      container = {
+        enable_character_fade = true
+      },
+      indent = {
+        indent_size = 2,
+        padding = 1, -- extra padding on left hand side
+        -- indent guides
+        with_markers = true,
+        indent_marker = '│',
+        last_indent_marker = '└',
+        highlight = 'NeoTreeIndentMarker',
+        -- expander config, needed for nesting files
+        with_expanders = nil, -- if nil and file nesting is enabled, will enable expanders
+        expander_collapsed = '',
+        expander_expanded = '',
+        expander_highlight = 'NeoTreeExpander',
+      },
+      icon = {
+        folder_closed = '',
+        folder_open = '',
+        folder_empty = '󰜌',
+        folder_empty_open = '󰜌',
+        -- The next two settings are only a fallback, if you use nvim-web-devicons and configure default icons there
+        -- then these will never be used.
+        default = '*',
+        highlight = 'NeoTreeFileIcon'
+      },
+      modified = {
+        symbol = '[+]',
+        highlight = 'NeoTreeModified',
+      },
+      name = {
+        trailing_slash = false,
+        use_git_status_colors = true,
+        highlight = 'NeoTreeFileName',
+      },
+      git_status = {
+        symbols = {
+          -- Change type
+          added     = '', -- or "✚", but this is redundant info if you use git_status_colors on the name
+          modified  = '', -- or "", but this is redundant info if you use git_status_colors on the name
+          deleted   = '✖',-- this can only be used in the git_status source
+          renamed   = '󰁕',-- this can only be used in the git_status source
+          -- Status type
+          untracked = '',
+          ignored   = '',
+          unstaged  = '󰄱',
+          staged    = '',
+          conflict  = '',
+        }
+      },
+    },
     commands = {
       -- Custom command to open diffview on a file
       open_diff = function(state)
         local node = state.tree:get_node()
-        if node.type == 'file' then vim.cmd('DiffviewOpen -- ' .. node.path) end
+        if node.type == 'file' then
+          vim.cmd('DiffviewOpen -- ' .. node.path)
+        end
       end,
     },
     window = {
@@ -98,9 +100,9 @@ return {
         nowait = true,
       },
       mappings = {
-        ['<space>'] = {
-          'toggle_node',
-          nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use
+        ['<space>'] = { 
+            'toggle_node', 
+            nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use 
         },
         ['<2-LeftMouse>'] = 'open',
         ['<cr>'] = 'open',
@@ -121,12 +123,12 @@ return {
         -- ['C'] = 'close_all_subnodes',
         ['z'] = 'close_all_nodes',
         --["Z"] = "expand_all_nodes",
-        ['a'] = {
+        ['a'] = { 
           'add',
           -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc)
           config = {
-            show_path = 'none', -- "none", "relative", "absolute"
-          },
+            show_path = 'none' -- "none", "relative", "absolute"
+          }
         },
         ['A'] = 'add_directory', -- also accepts the optional config.show_path option like "add". this also supports BASH style brace expansion.
         ['d'] = 'delete',
@@ -150,7 +152,7 @@ return {
         ['i'] = 'show_file_details',
         -- Git specific mappings for enhanced workflow
         ['gd'] = 'open_diff', -- Custom command to open diffview
-      },
+      }
     },
     clipboard = {
       sync = 'universal', -- or "global"/"universal" to share a clipboard for each/all Neovim instance(s), respectively
@@ -158,8 +160,8 @@ return {
     filesystem = {
       bind_to_cwd = false, -- true creates a 2-way binding between vim's cwd and neo-tree's root
       cwd_target = {
-        sidebar = 'tab', -- sidebar is when position = left or right
-        current = 'window', -- current is when position = current
+        sidebar = 'tab',   -- sidebar is when position = left or right
+        current = 'window' -- current is when position = current
       },
       follow_current_file = {
         enabled = true, -- This will find and focus the file in the active buffer every time
@@ -186,7 +188,7 @@ return {
           ['<c-x>'] = 'clear_filter',
           ['[g'] = 'prev_git_modified',
           [']g'] = 'next_git_modified',
-          ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+          ['o'] = { 'show_help', nowait=false, config = { title = 'Order by', prefix_key = 'o' }},
           ['oc'] = { 'order_by_created', nowait = false },
           ['od'] = { 'order_by_diagnostics', nowait = false },
           ['og'] = { 'order_by_git_status', nowait = false },
@@ -220,11 +222,11 @@ return {
           -- "*/src/*/tsconfig.json",
         },
         always_show = { -- remains visible even if other settings would normally hide it
-          '.gitignored',
-          '.env',
+          ".gitignored",
+          ".env",
         },
         always_show_by_pattern = { -- uses glob style patterns
-          '.env*',
+          ".env*",
         },
         never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
           -- ".DS_Store",
@@ -248,21 +250,21 @@ return {
           ['bd'] = 'buffer_delete',
           ['<bs>'] = 'navigate_up',
           ['.'] = 'set_root',
-          ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+          ['o'] = { 'show_help', nowait=false, config = { title = 'Order by', prefix_key = 'o' }},
           ['oc'] = { 'order_by_created', nowait = false },
           ['od'] = { 'order_by_diagnostics', nowait = false },
           ['om'] = { 'order_by_modified', nowait = false },
           ['on'] = { 'order_by_name', nowait = false },
           ['os'] = { 'order_by_size', nowait = false },
           ['ot'] = { 'order_by_type', nowait = false },
-        },
+        }
       },
     },
     git_status = {
       window = {
         position = 'float',
         mappings = {
-          ['A'] = 'git_add_all',
+          ['A']  = 'git_add_all',
           ['gu'] = 'git_unstage_file',
           ['ga'] = 'git_add_file',
           ['gr'] = 'git_revert_file',
@@ -271,15 +273,15 @@ return {
           ['gg'] = { 'git_commit_and_push', config = { wait = true } },
           -- Git specific diff view
           ['gd'] = 'open_diff', -- Open file in diffview
-          ['o'] = { 'show_help', nowait = false, config = { title = 'Order by', prefix_key = 'o' } },
+          ['o'] = { 'show_help', nowait=false, config = { title = 'Order by', prefix_key = 'o' }},
           ['oc'] = { 'order_by_created', nowait = false },
           ['od'] = { 'order_by_diagnostics', nowait = false },
           ['om'] = { 'order_by_modified', nowait = false },
           ['on'] = { 'order_by_name', nowait = false },
           ['os'] = { 'order_by_size', nowait = false },
           ['ot'] = { 'order_by_type', nowait = false },
-        },
-      },
-    },
+        }
+      }
+    }
   },
 }
